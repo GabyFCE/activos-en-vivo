@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Activos en vivo</title>
+<style>
+  :root{
+    --bg:#0b0e13; --panel-top:#151b23; --panel-bot:#11161d;
+    --line:rgba(255,255,255,.07); --line-strong:rgba(255,255,255,.13);
+    --txt:#e8edf3; --muted:#7d8590; --dim:#5c646e;
+    --up:#3fb950; --up-bg:rgba(63,185,80,.13);
+    --down:#f85149; --down-bg:rgba(248,81,73,.13);
+    --accent:#58a6ff;
+  }
+  *{box-sizing:border-box}
+  html,body{background:var(--bg)}
+  body{
+    margin:0; color:var(--txt); padding:0 24px 44px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    font-size:14px; -webkit-font-smoothing:antialiased;
+  }
+
+  /* encabezado */
+  header{
+    position:sticky; top:0; z-index:10;
+    display:flex; flex-wrap:wrap; align-items:center; gap:16px;
+    padding:20px 0 14px; margin-bottom:2px;
+    background:linear-gradient(var(--bg) 74%, rgba(11,14,19,0));
+  }
+  h1{font-size:17px;font-weight:600;letter-spacing:-.01em;margin:0}
+  h1 .light{color:var(--dim);font-weight:400}
+  .meta{flex:1;color:var(--muted);font-size:12.5px;display:flex;align-items:center;gap:8px}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--up);flex:none;
+       animation:pulse 2.4s infinite}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(63,185,80,.5)}
+    70%{box-shadow:0 0 0 6px rgba(63,185,80,0)}
+    100%{box-shadow:0 0 0 0 rgba(63,185,80,0)}
+  }
+  button{
+    background:var(--panel-top); color:var(--txt); border:1px solid var(--line-strong);
+    border-radius:7px; padding:7px 14px; cursor:pointer; font-size:12.5px;
+    transition:border-color .15s, color .15s;
+  }
+  button:hover{border-color:var(--accent); color:var(--accent)}
+  button:active{transform:translateY(1px)}
+
+  /* secciones */
+  .seccion{margin-top:26px}
+  .sec-head{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+  .sec-head::before{content:"";width:3px;height:13px;border-radius:2px;background:var(--accent);opacity:.85}
+  .sec-head h2{font-size:11.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
+               color:var(--muted);margin:0}
+  .sec-head .rule{flex:1;height:1px;background:var(--line)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:11px}
+
+  /* tarjetas */
+  .card{
+    background:linear-gradient(170deg,var(--panel-top),var(--panel-bot));
+    border:1px solid var(--line); border-radius:10px; padding:13px 15px 12px;
+    transition:border-color .16s, transform .16s;
+  }
+  .card:hover{border-color:var(--line-strong); transform:translateY(-1px)}
+  .name{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--dim);
+        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+  .val{font-size:24px;font-weight:600;letter-spacing:-.025em;margin:7px 0 9px;
+       font-variant-numeric:tabular-nums;font-feature-settings:"tnum";line-height:1.1}
+  .foot{display:flex;align-items:center;gap:7px;min-height:18px}
+  .sub{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .chip{display:inline-flex;align-items:center;padding:2px 7px;border-radius:5px;
+        font-size:11.5px;font-weight:600;font-variant-numeric:tabular-nums}
+  .chip.up{color:var(--up);background:var(--up-bg)}
+  .chip.down{color:var(--down);background:var(--down-bg)}
+  .chip.flat{color:var(--muted);background:rgba(255,255,255,.05)}
+  .err{color:var(--down);font-size:12px;line-height:1.5}
+
+  footer{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);
+         color:var(--dim);font-size:11.5px;line-height:1.9}
+  .src{display:inline-block;padding:1px 7px;border:1px solid var(--line);border-radius:5px;
+       margin-right:6px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Activos <span class="light">en vivo</span></h1>
+  <div class="meta">
+    <span class="dot"></span>
+    <span><span id="stamp">—</span> · refresco en <span id="countdown">—</span>s</span>
+  </div>
+  <button id="refresh">Actualizar</button>
+</header>
+
+<section class="seccion">
+  <div class="sec-head"><h2>Dólares</h2><div class="rule"></div></div>
+  <div class="grid" id="dolares"></div>
+</section>
+
+<section class="seccion">
+  <div class="sec-head"><h2>Cripto · USD</h2><div class="rule"></div></div>
+  <div class="grid" id="cripto"></div>
+</section>
+
+<section class="seccion">
+  <div class="sec-head"><h2>Acciones argentinas</h2><div class="rule"></div></div>
+  <div class="grid" id="acciones"></div>
+</section>
+
+<section class="seccion">
+  <div class="sec-head"><h2>Bonos</h2><div class="rule"></div></div>
+  <div class="grid" id="bonos"></div>
+</section>
+
+<footer>
+  <span class="src">dolarapi.com</span><span class="src">CoinGecko</span><span class="src">data912.com</span><br>
+  Precios de referencia, pueden estar demorados. No usar para operar.
+</footer>
+
+<script>
+"use strict";
+
+const REFRESH_MS = 30000;
+const fmt = new Intl.NumberFormat("es-AR", {maximumFractionDigits: 2});
+const fmtC = v => new Intl.NumberFormat("es-AR",
+    {maximumFractionDigits: v >= 1000 ? 0 : v >= 1 ? 2 : 4}).format(v);
+
+const TICKERS_ACCIONES = ["GGAL","YPFD","PAMP","ALUA","BBAR","TXAR","CRES","SUPV","TECO2","BMA","MIRG","CEPU"];
+const TICKERS_BONOS = ["AL30","GD30","AE38","AL35","GD35","AL41","GD41","AL29"];
+const CRIPTO = [["bitcoin","BTC"],["ethereum","ETH"],["solana","SOL"],
+                ["binancecoin","BNB"],["tether","USDT"],["ripple","XRP"]];
+
+function card(nombre, valor, sub, pct) {
+  const el = document.createElement("div");
+  el.className = "card";
+
+  const n = document.createElement("div"); n.className = "name"; n.textContent = nombre;
+  const v = document.createElement("div"); v.className = "val"; v.textContent = valor;
+
+  const foot = document.createElement("div"); foot.className = "foot";
+  if (sub) {
+    const s = document.createElement("div"); s.className = "sub"; s.textContent = sub;
+    foot.appendChild(s);
+  }
+  if (pct !== undefined && pct !== null && isFinite(Number(pct))) {
+    const p = Number(pct);
+    const c = document.createElement("span");
+    c.className = "chip " + (p > 0 ? "up" : p < 0 ? "down" : "flat");
+    c.textContent = (p > 0 ? "+" : p < 0 ? "−" : "") + fmt.format(Math.abs(p)) + "%";
+    foot.appendChild(c);
+  }
+
+  el.append(n, v, foot);
+  return el;
+}
+
+function errorBox(cont, msg) {
+  const d = document.createElement("div");
+  d.className = "card err";
+  d.textContent = msg;
+  cont.appendChild(d);
+}
+
+function limpiar(id) { document.getElementById(id).innerHTML = ""; }
+
+const nombreDolar = d => d.casa === "contadoconliqui" ? "CCL" : (d.nombre || d.casa);
+
+async function cargarDolares() {
+  const cont = document.getElementById("dolares");
+  limpiar("dolares");
+  try {
+    const r = await fetch("https://dolarapi.com/v1/dolares", {cache: "no-store"});
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const data = await r.json();
+    const orden = ["oficial","blue","bolsa","contadoconliqui","tarjeta","mayorista"];
+    const pos = c => { const i = orden.indexOf(c); return i < 0 ? 99 : i; };
+    data.sort((a,b) => pos(a.casa) - pos(b.casa));
+    for (const d of data) {
+      cont.appendChild(card(nombreDolar(d), "$ " + fmt.format(d.venta), "compra " + fmt.format(d.compra), null));
+    }
+    if (!data.length) errorBox(cont, "Sin datos");
+  } catch (e) {
+    errorBox(cont, "No se pudo cargar dólares: " + e.message);
+  }
+}
+
+async function cargarCripto() {
+  const cont = document.getElementById("cripto");
+  limpiar("cripto");
+  try {
+    const ids = CRIPTO.map(c => c[0]).join(",");
+    const url = "https://api.coingecko.com/api/v3/simple/price?ids=" + ids +
+                "&vs_currencies=usd&include_24hr_change=true";
+    const r = await fetch(url, {cache: "no-store"});
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const data = await r.json();
+    for (const [id, simbolo] of CRIPTO) {
+      const p = data[id];
+      if (!p) continue;
+      cont.appendChild(card(simbolo, "$ " + fmtC(p.usd), null, p.usd_24h_change));
+    }
+  } catch (e) {
+    errorBox(cont, "No se pudo cargar cripto: " + e.message);
+  }
+}
+
+async function cargarPanel(endpoint, idContenedor, tickers, etiqueta) {
+  const cont = document.getElementById(idContenedor);
+  limpiar(idContenedor);
+  try {
+    const r = await fetch(endpoint, {cache: "no-store"});
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const data = await r.json();
+    const mapa = new Map(data.map(x => [x.symbol, x]));
+    let puestos = 0;
+    for (const t of tickers) {
+      const x = mapa.get(t);
+      if (!x || !x.c) continue;
+      cont.appendChild(card(t, "$ " + fmt.format(x.c), null, x.pct_change));
+      puestos++;
+    }
+    if (!puestos) errorBox(cont, "Sin cotizaciones de " + etiqueta);
+  } catch (e) {
+    errorBox(cont, "No se pudo cargar " + etiqueta + ": " + e.message);
+  }
+}
+
+let restante = REFRESH_MS / 1000;
+
+async function actualizarTodo() {
+  await Promise.allSettled([
+    cargarDolares(),
+    cargarCripto(),
+    cargarPanel("https://data912.com/live/arg_stocks", "acciones", TICKERS_ACCIONES, "acciones"),
+    cargarPanel("https://data912.com/live/arg_bonds", "bonos", TICKERS_BONOS, "bonos")
+  ]);
+  document.getElementById("stamp").textContent = new Date().toLocaleTimeString("es-AR");
+  restante = REFRESH_MS / 1000;
+}
+
+document.getElementById("refresh").addEventListener("click", actualizarTodo);
+
+setInterval(() => {
+  restante--;
+  if (restante <= 0) { actualizarTodo(); restante = REFRESH_MS / 1000; }
+  document.getElementById("countdown").textContent = restante;
+}, 1000);
+
+actualizarTodo();
+</script>
+</body>
+</html>
