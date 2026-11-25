@@ -1,48 +1,67 @@
 # activos-en-vivo
 
-Página de una sola archivo que muestra cotizaciones de dólares, cripto, acciones
-argentinas y bonos. Sin servidor, sin dependencias, sin credenciales.
+Una sola página que muestra, sin recargar ni registrarse, las cotizaciones del día de los
+dólares, las principales criptomonedas, doce acciones argentinas y ocho bonos soberanos.
 
-Para usarla, abrir `index.html` en el navegador con conexión a internet.
+Sirve para mirar el mercado de un vistazo: reemplaza tener cinco pestañas abiertas en sitios
+distintos y funciona como panel de escritorio o como pantalla fija en un segundo monitor.
+
+![Vista de la página](preview.png)
 
 ## Qué muestra
 
-- **Dólares**: oficial, blue, bolsa, CCL, tarjeta, mayorista y cripto, con compra y venta.
-- **Cripto**: BTC, ETH, SOL, BNB, USDT y XRP en dólares, con variación.
-- **Acciones argentinas**: doce papeles con variación del día.
-- **Bonos**: AL30, GD30, AE38, AL35, GD35, AL41, GD41 y AL29.
+| Bloque | Contenido |
+| --- | --- |
+| Dólares | Oficial, blue, bolsa, contado con liquidación, tarjeta, mayorista y cripto, con compra y venta |
+| Cripto | BTC, ETH, SOL, BNB, USDT y XRP en dólares, con variación |
+| Acciones argentinas | Doce papeles con la variación del día |
+| Bonos | AL30, GD30, AE38, AL35, GD35, AL41, GD41 y AL29 |
 
-Se refresca sola cada 30 segundos. El botón "Actualizar" hace la consulta en el momento.
+Cada bloque carga por separado: si una fuente no responde, ese bloque muestra el error y los
+demás siguen funcionando.
 
-Si una fuente no responde, esa sección muestra el error y el resto sigue funcionando.
+## Cómo se usa
+
+Se abre `index.html` en cualquier navegador con conexión. No hay que instalar nada, ni
+compilar, ni servir la página desde un servidor.
+
+- Se actualiza sola cada 30 segundos, con una cuenta regresiva visible en el pie.
+- El botón **Actualizar** consulta en el momento, sin esperar el ciclo.
+- La hora de la última carga queda a la vista para saber si el dato está fresco.
+
+## Cómo funciona
+
+Un único archivo con el HTML, los estilos y el código. Cuatro pedidos en paralelo a APIs
+públicas, cada uno con su propio manejo de error, y el resultado se dibuja en el DOM.
+
+No hay backend ni clave de API: las consultas salen del navegador, así que el proyecto
+depende de que cada API permita CORS.
 
 ## Fuentes
 
-| Sección | API |
+| Bloque | Endpoint |
 | --- | --- |
 | Dólares | `dolarapi.com/v1/dolares` |
-| Cripto | `api.coingecko.com/v3/simple/price` |
-| Acciones y bonos | `data912.com/live/arg_stocks`, `data912.com/live/arg_bonds` |
+| Cripto | `api.coingecko.com/api/v3/simple/price` |
+| Acciones | `data912.com/live/arg_stocks` |
+| Bonos | `data912.com/live/arg_bonds` |
 
-Las tres son públicas y no piden clave. Los pedidos van directo desde el navegador,
-así que la página depende de que cada API permita CORS.
+Las cuatro son gratuitas y no piden credenciales.
 
 ## Límites
 
-- Los precios son de referencia y pueden estar demorados. La página lo dice en el pie.
+- Los precios son de referencia y pueden venir demorados; la página lo aclara en el pie.
 - No hay historial ni gráficos: muestra el último valor de cada activo.
-- Si alguna de las APIs cambia su formato o deja de permitir CORS, la sección correspondiente deja de cargar.
+- Si una API cambia el formato de respuesta o deja de permitir CORS, ese bloque deja de cargar.
+- No hay modo oscuro ni otros temas: el diseño está pensado para un solo formato.
 
-## Archivos
+## Estructura
 
 ```
-index.html    la página completa: estilos, lógica y maquetado
+index.html    página completa: maquetado, estilos y lógica
 preview.png   imagen de referencia del diseño
 ```
 
-`preview.png` no es una captura del navegador: la genera un script aparte que
-dibuja el mismo diseño con los datos del momento. Ese script no está en el repo.
-
 ## Licencia
 
-MIT.
+MIT. Ver `LICENSE`.
