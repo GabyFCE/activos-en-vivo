@@ -1,67 +1,70 @@
 # activos-en-vivo
 
-Una sola página que muestra, sin recargar ni registrarse, las cotizaciones del día de los
-dólares, las principales criptomonedas, doce acciones argentinas y ocho bonos soberanos.
-
-Sirve para mirar el mercado de un vistazo: reemplaza tener cinco pestañas abiertas en sitios
-distintos y funciona como panel de escritorio o como pantalla fija en un segundo monitor.
+Panel web de página única para consultar cotizaciones del día de dólares, criptomonedas, acciones argentinas y bonos soberanos sin registro ni recarga manual.
 
 ![Vista de la página](preview.png)
 
-## Qué muestra
+## Qué es y para qué sirve
 
-| Bloque | Contenido |
-| --- | --- |
-| Dólares | Oficial, blue, bolsa, contado con liquidación, tarjeta, mayorista y cripto, con compra y venta |
-| Cripto | BTC, ETH, SOL, BNB, USDT y XRP en dólares, con variación |
-| Acciones argentinas | Doce papeles con la variación del día |
-| Bonos | AL30, GD30, AE38, AL35, GD35, AL41, GD41 y AL29 |
+Seguir el mercado local y cripto suele requerir mantener cinco pestañas abiertas en sitios distintos, cada una con publicidad, tiempos de carga dispares y recargas manuales.
 
-Cada bloque carga por separado: si una fuente no responde, ese bloque muestra el error y los
-demás siguen funcionando.
+Este proyecto reúne esas cotizaciones en una sola vista pensada como panel de escritorio o pantalla fija para un segundo monitor. Realiza las consultas desde el navegador cada 30 segundos, muestra una cuenta regresiva en el pie de página e informa la hora exacta de la última carga para verificar la vigencia del dato. También incluye un botón **Actualizar** para forzar la consulta en el momento sin esperar a que termine el ciclo.
 
-## Cómo se usa
+## Qué incluye
 
-Se abre `index.html` en cualquier navegador con conexión. No hay que instalar nada, ni
-compilar, ni servir la página desde un servidor.
+El panel se divide en cuatro bloques independientes y consume cuatro endpoints públicos y gratuitos que no requieren credenciales:
 
-- Se actualiza sola cada 30 segundos, con una cuenta regresiva visible en el pie.
-- El botón **Actualizar** consulta en el momento, sin esperar el ciclo.
-- La hora de la última carga queda a la vista para saber si el dato está fresco.
+| Bloque | Contenido | Fuente |
+| --- | --- | --- |
+| Dólares | Oficial, blue, bolsa, contado con liquidación, tarjeta, mayorista y cripto (compra y venta) | `dolarapi.com/v1/dolares` |
+| Cripto | 6 activos en dólares con variación: BTC, ETH, SOL, BNB, USDT y XRP | `api.coingecko.com/api/v3/simple/price` |
+| Acciones argentinas | 12 papeles con la variación del día | `data912.com/live/arg_stocks` |
+| Bonos | 8 bonos soberanos: AL30, GD30, AE38, AL35, GD35, AL41, GD41 y AL29 | `data912.com/live/arg_bonds` |
 
-## Cómo funciona
+## Decisiones técnicas
 
-Un único archivo con el HTML, los estilos y el código. Cuatro pedidos en paralelo a APIs
-públicas, cada uno con su propio manejo de error, y el resultado se dibuja en el DOM.
-
-No hay backend ni clave de API: las consultas salen del navegador, así que el proyecto
-depende de que cada API permita CORS.
-
-## Fuentes
-
-| Bloque | Endpoint |
-| --- | --- |
-| Dólares | `dolarapi.com/v1/dolares` |
-| Cripto | `api.coingecko.com/api/v3/simple/price` |
-| Acciones | `data912.com/live/arg_stocks` |
-| Bonos | `data912.com/live/arg_bonds` |
-
-Las cuatro son gratuitas y no piden credenciales.
-
-## Límites
-
-- Los precios son de referencia y pueden venir demorados; la página lo aclara en el pie.
-- No hay historial ni gráficos: muestra el último valor de cada activo.
-- Si una API cambia el formato de respuesta o deja de permitir CORS, ese bloque deja de cargar.
-- No hay historial, gráficos ni alertas: muestra el último valor de cada activo.
+- **Archivo único (`index.html`) en lugar de empaquetadores o frameworks con paso de compilación:** todo el maquetado, los estilos y la lógica residen en un solo documento. Esto elimina la instalación de gestores de paquetes, pasos de compilación y servidores locales; el archivo se abre directamente en el navegador mediante el protocolo `file://`.
+- **Consultas directas desde el cliente en lugar de un servidor intermediario (backend):** el navegador ejecuta los pedidos HTTP hacia las APIs públicas. Esto evita el costo y mantenimiento de infraestructura propia y la gestión de claves de API, con la condición de depender de que cada proveedor mantenga habilitado el acceso por CORS y conserve su formato de respuesta.
+- **Carga en paralelo con aislamiento de errores en lugar de una consulta unificada bloqueante:** los cuatro pedidos se disparan de forma independiente y cada uno maneja sus propias excepciones antes de dibujar en el DOM. Si una fuente falla o tarda en responder, solo ese bloque informa el error mientras los otros tres muestran sus datos con normalidad.
+- **Valores instantáneos sin almacenamiento en lugar de base de datos con series históricas:** la interfaz renderiza únicamente el último precio disponible sin guardar estados previos, gráficos ni alertas. Esto evita el consumo creciente de memoria en sesiones largas de segundo monitor y mantiene el código sin dependencias externas.
 
 ## Estructura
 
+```text
+.gitignore    Configuración de archivos excluidos del control de versiones
+LICENSE       Texto de la licencia MIT
+README.md     Documentación del repositorio
+index.html    Página completa: maquetado HTML, estilos CSS y lógica de consulta
+preview.png   Captura de pantalla de referencia de la interfaz
 ```
-index.html    página completa: maquetado, estilos y lógica
-preview.png   imagen de referencia del diseño
+
+## Cómo se usa
+
+No requiere instalación de dependencias, compilación ni servidor web local. Se necesita un navegador web con conexión a internet.
+
+Abrir el archivo `index.html` en el navegador:
+
+```bash
+# En Linux
+xdg-open index.html
+
+# En macOS
+open index.html
+
+# En Windows
+start index.html
 ```
+
+También se puede abrir arrastrando el archivo `index.html` hacia una ventana abierta del navegador o mediante doble clic desde el explorador de archivos del sistema.
+
+## Cómo se publica
+
+Al consistir en un único archivo estático sin procesamiento en servidor, se despliega subiendo `index.html` a cualquier servicio de alojamiento estático (como GitHub Pages) o copiándolo en el directorio público de un servidor web estándar sin configuración adicional.
+
+## Estado del contenido
+
+Los precios mostrados provienen en tiempo real de las APIs externas listadas, tienen carácter de referencia y pueden presentar demoras de origen; el pie de la página incluye esta aclaración de forma permanente. Si alguno de los proveedores externos modifica la estructura de su JSON o restringe los encabezados CORS, el bloque correspondiente dejará de mostrar cotizaciones hasta que se ajuste el código.
 
 ## Licencia
 
-MIT. Ver `LICENSE`.
+Distribuido bajo la licencia MIT. Consultar el archivo `LICENSE` para más detalles.
