@@ -53,7 +53,7 @@ Las cuatro son gratuitas y no piden credenciales.
 - Los precios son de referencia y pueden venir demorados; la página lo aclara en el pie.
 - No hay historial ni gráficos: muestra el último valor de cada activo.
 - Si una API cambia el formato de respuesta o deja de permitir CORS, ese bloque deja de cargar.
-- No hay modo oscuro ni otros temas: el diseño está pensado para un solo formato.
+- No hay historial, gráficos ni alertas: muestra el último valor de cada activo.
 
 ## Estructura
 
