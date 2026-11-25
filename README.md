@@ -31,9 +31,7 @@ El panel se divide en cuatro bloques independientes y consume cuatro endpoints p
 ## Estructura
 
 ```text
-.gitignore    Configuración de archivos excluidos del control de versiones
 LICENSE       Texto de la licencia MIT
-README.md     Documentación del repositorio
 index.html    Página completa: maquetado HTML, estilos CSS y lógica de consulta
 preview.png   Captura de pantalla de referencia de la interfaz
 ```
